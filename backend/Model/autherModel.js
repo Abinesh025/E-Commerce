@@ -40,11 +40,11 @@ const autherSchema = new mongoose.Schema(
 )
     // <--------Password Handling---------->
 autherSchema.pre("save",async function (next){
-    if(!this.isModified){
-        next()
+    if(!this.isModified("password")){
+      return ;
     }
     const salt = await bcryptjs.genSalt(10);
-    this.password =  bcryptjs.hash(salt,this.password)
+    this.password =await bcryptjs.hash(this.password,salt);
 });
 
 

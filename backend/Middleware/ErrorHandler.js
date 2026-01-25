@@ -11,12 +11,15 @@ export default (err,req,res,next) =>{
           error:err
     })
   };
+  
   // <----------Production--------->
 
     if(process.env.NODE_ENV == "Production"){
 
       let message = err.message;
       let error = new Error(message)
+
+      // Validation Error
 
       if(err.name == "ValidationError"){
 
@@ -25,19 +28,31 @@ export default (err,req,res,next) =>{
 
       }
 
+      // 11000 Error
+
       if(err.code == 11000){
+
         message = `your ${Object.keys(err.keyValue)} is already exists`
         error = new Error(message);
+
       }
+
+      // Token Error
 
       if(err.name == "JsonWebTokenError"){
+
         message = `Json Token is invlid.Try again!`
         error = new Error(message);
+
       }
 
+      // logout Error
+
       if(err.name == "TokenExpiredError"){
+
         message = `Json Token is Expired`
         error = new Error(message);
+        
       }
 
       if(err.name == "CastError"){
@@ -50,6 +65,7 @@ export default (err,req,res,next) =>{
        return  res.status(err.statusCode).json({
           success:false,
           message:error.message || "Internal Server Error"
-    })
+    });
+    
   };
 }

@@ -1,11 +1,15 @@
-  import react from "react"
-import Navbar from "./Components/Navbar"
+  import react, { Fragment } from "react"
+import Navbar from "./Components/Layouts/Navbar"
+import Footer from "./Components/Layouts/Footer"
+import Home from "./Components/Home"
 
   const App = ()=>{
       return(
-        <div>
+      <Fragment >
           <Navbar />
-        </div>
+          <Home />
+          <Footer />
+      </Fragment>  
       )
   }
 

@@ -1,10 +1,11 @@
 import AsyncError from "../Middleware/AsyncError.js";
 import ErrorHandler from "../Utils/error.js";
-import autherModel from "../Model/autherModel.js"
+import Auther from "../Model/autherModel.js"
 import { getResponse } from "../Utils/JWT.js";
 import { getToken } from "../Utils/token.js";
 import { getEmail } from "../Utils/email.js";
 import crypto from "crypto";
+import { get } from "http";
 
 // Create Student
 
@@ -14,11 +15,12 @@ export const createAuther = async(req,res)=>{
 
     const {name,email,password} = req.body;
 
-   const user = await autherModel.create({
+   const user = await Auther.create({
         name,
         email,
         password
     });
+    
 
     getResponse(user,200,res);
 }
@@ -29,7 +31,7 @@ export const getLogin = AsyncError(async(req,res,next)=>{
 
     const {email,password} = req.body;
 
-    const user = await autherModel.findOne({email}).select("+password");
+    const user = await Auther.findOne({email}).select("+password");
 
     if(!user){
         return next(new ErrorHandler("User Not Found",400));
@@ -58,11 +60,6 @@ export const getLogout  = AsyncError(async(req,res,next)=>{
     }).json({success:true,message:"LogOut SuccessFully"});
 })
 
-// Update
-
-export const getUpdateAuther = AsyncError(async(req,res,next)=>{
-    
-})
 
 // ForgetPassword
 
@@ -70,10 +67,10 @@ export const forgetPassword = AsyncError(async(req,res,next)=>{
 
     const {email} = req.body;
 
-    const user = await autherModel.findOne({email});
+    const user = await Auther.findOne({email});
 
     if(!user){
-        return next(new ErrorHandler("User Not Found", 400));
+        return new ErrorHandler("User Not Found", 400);
     }
 
     const resetToken =await user.getResetPassword();
@@ -98,7 +95,7 @@ export const forgetPassword = AsyncError(async(req,res,next)=>{
         user.resetpassword = undefined;
         user.resetpasswordtoken = undefined;
        await user.save({validateBeforeSave:false});
-        next(new ErrorHandler("Don't Change Password",400))
+        new ErrorHandler("Don't Change Password",400)
     }
 })
 
@@ -109,22 +106,22 @@ export const resetPassword = AsyncError(async(req,res,next)=>{
 
     const {password,confirmPassword}  = req.body;
 
-    const user = await autherModel.findOne({resetpassword,resetpasswordtoken:{$gt:Date.now()}});
+    const user = await Auther.findOne({resetpassword,resetpasswordtoken:{$gt:Date.now()}});
 
     if(!user){
-        return new ErrorHandler("Token Not valid for modify",400)
+        return next (new ErrorHandler("Token Not valid for modify",400))
     };
 
     if(!password || !confirmPassword){
-        return new ErrorHandler("Enter Password or current Password",400)
+        return next(new ErrorHandler("Enter Password or current Password",400))
     };
 
     if(password !== confirmPassword){
-        return new ErrorHandler("Password doesn't match",400)
+        return next( new ErrorHandler("Password doesn't match",400))
     }
     
     user.password = password;
-    user.resetPassword = undefined;
+    user.resetpassword = undefined;
     user.resetpasswordtoken = undefined;
     await user.save({validateBeforeSave:false});
 
@@ -135,15 +132,110 @@ export const resetPassword = AsyncError(async(req,res,next)=>{
 
 })
 
+// Change Password
+
+export const changePassword = AsyncError(async(req,res,next)=>{
+
+    const {oldPassword,currentPassword} = req.body;
+
+    const user = await Auther.findById({_id:req.user._id}).select("+password");
+
+    if(!user){
+        return next(new ErrorHandler("User Not Found",400))
+    }
+
+    if(!(await user.isValidPassword(oldPassword))){
+        return next(new ErrorHandler("OLD Password Doesn't Match",400))
+    }
+    user.password = currentPassword;
+
+    await user.save();
+
+    return res.status(200).json({success:true,message:"Password Change Successfully"})
+
+})
+
+// Update
+
+export const getUpdateAuther = AsyncError(async(req,res,next)=>{
+    const {name,email} = req.body;
+
+    const user = await Auther.findByIdAndUpdate({_id:req.user._id},{name,email},{
+        new:true,
+        runValidators:true
+    })
+
+    if(!user){
+        return next(new ErrorHandler("Cannot Modify",400))
+    }
+
+    getResponse(user,200,res)
+})
+
 // User
 
 export const getUser = AsyncError(async(req,res,next)=>{
 
-    const user = await autherModel.findOne({_id:req.user._id});
+    const user = await Auther.findById({_id:req.user._id});
 
     if(!user){
         return new ErrorHandler("User Not Found",400);
     }
 
     return res.status(200).json({success:true,user});
+})
+
+// Admin All User api/get/admin/All
+
+export const getAll = AsyncError(async(req,res,next)=>{
+
+    const users = await Auther.find();
+
+    getResponse(users,200,res)
+})
+
+// Admin Update /api/get/admin/user/:id
+
+export const getSpecificUser = AsyncError(async(req,res,next)=>{
+
+    const user = await Auther.findById(req.params.id);
+
+    if(!user){
+        return next(new ErrorHandler("User Not Found",400))
+    }
+
+    getResponse(user,200,res);
+})
+
+
+export const getUpdateAdmin = AsyncError(async(req,res,next)=>{
+
+    const {name,role,email}=req.body;
+
+    const user = await Auther.findByIdAndUpdate(req.params.id,{name,email,role},{
+        new:true,
+        runValidators:true
+    });
+
+
+
+    if(!user){
+        return next(new ErrorHandler("User Not Found",400));
+    }
+
+    return  res.status(200).json(user)
+    
+})
+
+export const deleteAdmin = AsyncError(async(req,res,next)=>{
+
+    const user = await Auther.findByIdAndDelete(req.params.id);
+
+    if(!user){
+        return next(new ErrorHandler("User Not Found",400));
+    }
+
+
+
+    return res.status(200).json({success:true,message:"Delete SuccessFully"});
 })

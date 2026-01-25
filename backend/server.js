@@ -8,6 +8,7 @@ import ErrorHandler from "./Middleware/ErrorHandler.js";
 import qs from "qs";
 import authRouter from "./Routes/autherRoutes.js";
 import cookieparser from "cookie-parser"
+import orderRoute from "./Routes/orderRoutes.js";
 
 
 const app = express();
@@ -23,7 +24,9 @@ app.use((req, res, next) => {
 
 app.use("/api/get",productsRouter);
 
-app.use("/api/get",authRouter)
+app.use("/api/get",authRouter);
+
+app.use("/api/get",orderRoute);
 
 app.use(ErrorHandler)
 
