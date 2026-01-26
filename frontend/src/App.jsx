@@ -5,11 +5,11 @@ import Home from "./Components/Home"
 
   const App = ()=>{
       return(
-      <Fragment >
-          <Navbar />
+        <div className="w-full">
+                 <Navbar />
           <Home />
           <Footer />
-      </Fragment>  
+        </div>  
       )
   }
 

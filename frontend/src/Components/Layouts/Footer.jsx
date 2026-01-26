@@ -4,7 +4,10 @@ const Footer = () => {
   return (
     <>
 
-        <footer className="relative overflow-hidden px-6 md:px-16 lg:px-24 xl:px-32 w-full text-sm text-slate-500 bg-white pt-10">
+        <footer className="relative overflow-hidden  md:px-16  border-b border-gray-300 bg-white transition-all text-sm text-slate-500 bg-white pt-">
+            <div className='w-full text-center p-2 bg-indigo-600 rounded-lg' >
+                <p className='text-white mb-2'>Back to Top</p>
+            </div>
             <svg className="hidden md:block absolute -bottom-30 -left-80 opacity-5 w-full h-full pointer-events-none" width="68"
                 height="26" viewBox="0 0 68 26" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clip-path="url(#clip0_8678_1074)">
@@ -17,7 +20,7 @@ const Footer = () => {
                     </clipPath>
                 </defs>
             </svg>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-14 p-2">
                 <div className="sm:col-span-2 lg:col-span-1">
                     <a href="https://prebuiltui.com">
                         <svg width="157" height="40" viewBox="0 0 157 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -52,7 +55,7 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 py-4 border-t mt-6 border-slate-200">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 py-4 border-t mt-6 border-slate-200 mb-5">
                 <p className="text-center">
                     Copyright 2025 © <a href="https://prebuiltui.com">PrebuiltUI</a> All Right Reserved.
                 </p>
